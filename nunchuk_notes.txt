@@ -1,0 +1,254 @@
+Red is GND
+Green is 3V3
+White is SCL
+Yellow is SDA
+
+
+
+--------------------------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+--------------------------------------------------------------------------------
+entity i2c_test is
+port (
+	clk, start_button, rst:			 	                     in  std_logic;
+	sda, scl: 					                              out std_logic;
+   led0, led1, led2, led3, led4, led5, led6 ,led7, led8: out std_logic);
+end entity;
+--------------------------------------------------------------------------------
+architecture moore_fsm of i2c_test is
+	--FSM-related declarations:
+	type state is (idle_A, idle_B, start_A, start_B, SCL_high_A, SCL_high_B, SCL_low_A, SCL_low_B, done);
+	signal pr_state, nx_state: state;
+
+	--Timer-related delcarations:
+	constant T1: natural := 50000000; --100kHz @ fclk=50MHz
+	constant tmax: natural := 50000000;
+	signal t: natural range 0 to tmax;
+	
+	--Data and address
+	constant data: std_logic_vector(7 downto 0) := "10101010";
+	constant address: std_logic_vector(6 downto 0) := "1110111";
+
+begin
+	--Timer (using strategy #1):
+	process (clk, rst)
+	begin
+		if rst='0' then -- Active low reset
+			t <= 0;
+		elsif rising_edge(clk) then
+			if pr_state /= nx_state then
+				t <= 0;
+			elsif t /= tmax then
+				t <= t + 1;
+			end if;
+		end if;
+	end process;
+
+	--FSM state register:
+	process (clk, rst)
+	begin
+		if rst='0' then -- Active low reset
+			pr_state <= idle_A;
+		elsif rising_edge(clk) then
+			pr_state <= nx_state;
+		end if;
+	end process;
+
+	--FSM combinational logic:
+	process (all)
+		variable i: natural range 0 to 8;
+		begin
+		case pr_state is
+			-- All state logic follows same template:
+			-- when STATE
+			--		ssd <= proper SSD for this state
+			--		if t >= state timeout then
+			--			if going clockwise then
+			--				go down the list of states
+			--			else (counterclockwise)
+			--				go up the list of states
+			--		else (not enough time passed)
+			--			stay in current state
+			when idle_A =>
+				led0 <= '1';
+            led1 <= '0';
+            led2 <= '0';
+            led3 <= '0';
+            led4 <= '0';
+            led5 <= '0';
+            led6 <= '0';
+            led7 <= '0';
+            led8 <= '0';
+            
+            scl <= '1';
+				sda <= '1';
+            i := 0;
+				if t >= T1-1 and start_button = '0'then
+					--if start_button='0' then
+					nx_state <= idle_B;
+					--end if;
+				else
+					nx_state <= idle_A;
+				end if;
+            
+         when idle_B =>
+				led0 <= '0';
+            led1 <= '1';
+            led2 <= '0';
+            led3 <= '0';
+            led4 <= '0';
+            led5 <= '0';
+            led6 <= '0';
+            led7 <= '0';
+            led8 <= '0';
+            
+            scl <= '1';
+				sda <= '1';
+				if t >= T1-1 and start_button = '1'then
+					--if start_button='0' then
+					nx_state <= start_A;
+					--end if;
+				else
+					nx_state <= idle_B;
+				end if;
+				
+			when start_A =>
+				led0 <= '0';
+            led1 <= '0';
+            led2 <= '1';
+            led3 <= '0';
+            led4 <= '0';
+            led5 <= '0';
+            led6 <= '0';
+            led7 <= '0';
+            led8 <= '0';
+            
+            scl <= '1';
+				sda <= '0';
+				if t >= T1-1 then
+					nx_state <= start_B;
+				else
+					nx_state <= start_A;
+				end if;
+				
+			when start_B =>
+				led0 <= '0';
+            led1 <= '0';
+            led2 <= '0';
+            led3 <= '1';
+            led4 <= '0';
+            led5 <= '0';
+            led6 <= '0';
+            led7 <= '0';
+            led8 <= '0';
+            
+            scl <= '0';
+				sda <= '0';
+				if t >= T1-1 then
+					nx_state <= SCL_Low_A;
+				else
+					nx_state <= start_B;
+				end if;
+				
+			when SCL_Low_A =>
+				led0 <= '0';
+            led1 <= '0';
+            led2 <= '0';
+            led3 <= '0';
+            led4 <= '1';
+            led5 <= '0';
+            led6 <= '0';
+            led7 <= '0';
+            led8 <= '0';
+            
+            scl <= '0';
+				sda <= address(i);
+				if t >= T1-1 then
+					nx_state <= SCL_Low_B;
+				else
+					nx_state <= SCL_Low_A;
+				end if;
+				
+			when SCL_Low_B =>
+				led0 <= '0';
+            led1 <= '0';
+            led2 <= '0';
+            led3 <= '0';
+            led4 <= '0';
+            led5 <= '1';
+            led6 <= '0';
+            led7 <= '0';
+            led8 <= '0';
+            
+            scl <= '0';
+				sda <= address(i);
+				if t >= T1-1 then
+					nx_state <= SCL_High_A;
+				else
+					nx_state <= SCL_Low_B;
+				end if;
+				
+			when SCL_High_A =>
+				led0 <= '0';
+            led1 <= '0';
+            led2 <= '0';
+            led3 <= '0';
+            led4 <= '0';
+            led5 <= '0';
+            led6 <= '1';
+            led7 <= '0';
+            led8 <= '0';
+            
+            scl <= '1';
+				sda <= address(i);
+				if t >= T1-1 then
+					nx_state <= SCL_High_B;
+				else
+					nx_state <= SCL_High_A;
+				end if;
+				
+			when SCL_High_B =>
+				led0 <= '0';
+            led1 <= '0';
+            led2 <= '0';
+            led3 <= '0';
+            led4 <= '0';
+            led5 <= '0';
+            led6 <= '0';
+            led7 <= '1';
+            led8 <= '0';
+            
+            scl <= '1';
+				sda <= sda;
+				if t >= T1-1 then
+					i := i + 1;
+					if i >= 7 then
+						nx_state <= done;
+					else
+						nx_state <= SCL_Low_A;
+					end if;
+				else
+					nx_state <= SCL_High_B;
+				end if;
+            
+         when done =>
+				led0 <= '0';
+            led1 <= '0';
+            led2 <= '0';
+            led3 <= '0';
+            led4 <= '0';
+            led5 <= '0';
+            led6 <= '0';
+            led7 <= '0';
+            led8 <= '1';
+            
+            scl <= '1';
+				sda <= '1';
+            i := 0;
+				nx_state <= done;
+			
+		end case;
+	end process;
+end architecture;
+--------------------------------------------------------------------------------
