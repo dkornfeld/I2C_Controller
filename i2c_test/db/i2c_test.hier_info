@@ -1,4 +1,17 @@
 |i2c_test
+clk => DP[0].CLK
+clk => DP[1].CLK
+clk => DP[2].CLK
+clk => DP[3].CLK
+clk => DP[4].CLK
+clk => DP[5].CLK
+clk => j[0].CLK
+clk => j[1].CLK
+clk => j[2].CLK
+clk => j[3].CLK
+clk => j[4].CLK
+clk => j[5].CLK
+clk => j[6].CLK
 clk => i[0].CLK
 clk => i[1].CLK
 clk => i[2].CLK
@@ -18,7 +31,20 @@ clk => t[9].CLK
 clk => t[10].CLK
 clk => t[11].CLK
 clk => pr_state~1.DATAIN
-start_button => process_2.IN1
+start_button => ~NO_FANOUT~
+rst => DP[0].ACLR
+rst => DP[1].ACLR
+rst => DP[2].ACLR
+rst => DP[3].ACLR
+rst => DP[4].ACLR
+rst => DP[5].ACLR
+rst => j[0].ACLR
+rst => j[1].ACLR
+rst => j[2].ACLR
+rst => j[3].ACLR
+rst => j[4].ACLR
+rst => j[5].ACLR
+rst => j[6].ACLR
 rst => i[0].ACLR
 rst => i[1].ACLR
 rst => i[2].ACLR
@@ -38,6 +64,14 @@ rst => t[9].ACLR
 rst => t[10].ACLR
 rst => t[11].ACLR
 rst => pr_state~3.DATAIN
+data_display[0] <= raw_data[7].DB_MAX_OUTPUT_PORT_TYPE
+data_display[1] <= raw_data[6].DB_MAX_OUTPUT_PORT_TYPE
+data_display[2] <= raw_data[5].DB_MAX_OUTPUT_PORT_TYPE
+data_display[3] <= raw_data[4].DB_MAX_OUTPUT_PORT_TYPE
+data_display[4] <= raw_data[3].DB_MAX_OUTPUT_PORT_TYPE
+data_display[5] <= raw_data[2].DB_MAX_OUTPUT_PORT_TYPE
+data_display[6] <= raw_data[1].DB_MAX_OUTPUT_PORT_TYPE
+data_display[7] <= raw_data[0].DB_MAX_OUTPUT_PORT_TYPE
 sda <> sda
 scl <> scl
 
