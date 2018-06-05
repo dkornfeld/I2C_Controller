@@ -1,0 +1,44 @@
+|i2c_test
+clk => i[0].CLK
+clk => i[1].CLK
+clk => i[2].CLK
+clk => i[3].CLK
+clk => i[4].CLK
+clk => i[5].CLK
+clk => t[0].CLK
+clk => t[1].CLK
+clk => t[2].CLK
+clk => t[3].CLK
+clk => t[4].CLK
+clk => t[5].CLK
+clk => t[6].CLK
+clk => t[7].CLK
+clk => t[8].CLK
+clk => t[9].CLK
+clk => t[10].CLK
+clk => t[11].CLK
+clk => pr_state~1.DATAIN
+start_button => process_2.IN1
+rst => i[0].ACLR
+rst => i[1].ACLR
+rst => i[2].ACLR
+rst => i[3].ACLR
+rst => i[4].ACLR
+rst => i[5].ACLR
+rst => t[0].ACLR
+rst => t[1].ACLR
+rst => t[2].ACLR
+rst => t[3].ACLR
+rst => t[4].ACLR
+rst => t[5].ACLR
+rst => t[6].ACLR
+rst => t[7].ACLR
+rst => t[8].ACLR
+rst => t[9].ACLR
+rst => t[10].ACLR
+rst => t[11].ACLR
+rst => pr_state~3.DATAIN
+sda <> sda
+scl <> scl
+
+

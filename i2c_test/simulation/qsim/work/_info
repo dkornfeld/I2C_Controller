@@ -1,0 +1,81 @@
+m255
+K3
+13
+cModel Technology
+Z0 dC:\Users\david\Documents\GitHub\I2C_Controller\i2c_test\simulation\qsim
+vi2c_test
+Z1 !s100 a4TLa_9=1W1n71icaOdkk1
+Z2 I@:8iD5]_a3a?_RibRnTTW0
+Z3 VWhfXh8@3QNY01]X8AeOf:3
+Z4 dC:\Users\david\Documents\GitHub\I2C_Controller\i2c_test\simulation\qsim
+Z5 w1528159632
+Z6 8i2c_test.vo
+Z7 Fi2c_test.vo
+L0 31
+Z8 OV;L;10.1d;51
+r1
+31
+Z9 !s90 -work|work|i2c_test.vo|
+Z10 o-work work -O0
+!i10b 1
+!s85 0
+Z11 !s108 1528159633.886000
+Z12 !s107 i2c_test.vo|
+!s101 -O0
+vi2c_test_vlg_check_tst
+!i10b 1
+Z13 !s100 kERa5TYz[4Fl4FB8dAfU:1
+Z14 IJY6]be6M>Um19FcJ5lUzn0
+Z15 VS4Z>TO<2KOEeRnP2j_eWC2
+R4
+Z16 w1528159628
+Z17 8Waveform.vwf.vt
+Z18 FWaveform.vwf.vt
+L0 65
+R8
+r1
+!s85 0
+31
+Z19 !s108 1528159634.100000
+Z20 !s107 Waveform.vwf.vt|
+Z21 !s90 -work|work|Waveform.vwf.vt|
+!s101 -O0
+R10
+vi2c_test_vlg_sample_tst
+!i10b 1
+Z22 !s100 b0kT_YOPN;D`Vzb5KlPW`0
+Z23 In2gIRmg84Q8mJT2dCdg=?0
+Z24 V6i4XAbF5kOjSJz2M;CYhi1
+R4
+R16
+R17
+R18
+L0 29
+R8
+r1
+!s85 0
+31
+R19
+R20
+R21
+!s101 -O0
+R10
+vi2c_test_vlg_vec_tst
+!i10b 1
+!s100 BzHHl2;D9ZGRGhHVBQjSC0
+ITRCcHLdH0@K[400D6AoO:3
+Z25 VF>fCD5DJzTfF2]BUGj:kI1
+R4
+R16
+R17
+R18
+Z26 L0 175
+R8
+r1
+!s85 0
+31
+R19
+R20
+R21
+!s101 -O0
+R10

@@ -5,32 +5,60 @@ use ieee.std_logic_1164.all;
 entity i2c_test is
 port (
 	clk, start_button, rst:			 	in std_logic;
-	sda, scl: 								out std_logic);
+	sda, scl: 								inout std_logic);
 end entity;
 --------------------------------------------------------------------------------
 architecture moore_fsm of i2c_test is
+	--I2C Element Declarations
+	type i2c_element is (START, ONE, ZERO, S_ACK, M_ACK, RD, STOP);
+	type i2c_message is array(natural range <>) of i2c_element;
+
 	--FSM-related declarations:
-	type state is (idle, start_A, start_B, SCL_high_A, SCL_high_B, SCL_low_A, SCL_low_B);
+	type state is (Waiting, HiA, HiB, LoA, LoB);
 	signal pr_state, nx_state: state;
 
 	--Timer-related delcarations:
-	constant T1: natural := 500; --100kHz @ fclk=50MHz
-	constant tmax: natural := 500;
+	constant T1: natural := 500/4; --100kHz @ fclk=50MHz
+	constant T2: natural	:= 4000; -- 10 microseconds @ fclk=50MHz
+	constant tmax: natural := T2 + 1;
 	signal t: natural range 0 to tmax;
 	
 	--Data and address
-	constant data: std_logic_vector(0 to 7) := "10101010";
-	constant address: std_logic_vector(0 to 6) := "1101101";
+	constant setup: i2c_message(0 to 57) := (	START,
+															ONE, ZERO, ONE, ZERO, ZERO, ONE, ZERO, -- 0x52
+															ZERO, -- Write
+															S_ACK,
+															ONE, ONE, ONE, ONE, ZERO, ZERO, ZERO, ZERO, --0xF0
+															S_ACK,
+															ZERO, ONE, ZERO, ONE, ZERO, ONE, ZERO, ONE, --0x55
+															S_ACK,
+															STOP,
+															
+															START,
+															ONE, ZERO, ONE, ZERO, ZERO, ONE, ZERO, -- 0x52
+															ZERO, -- Write
+															S_ACK,
+															ONE, ONE, ONE, ONE, ONE, ZERO, ONE, ONE, --0xFB
+															S_ACK,
+															ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, --0x00
+															S_ACK,
+															STOP);
+	constant setup_length: natural := setup'length;
+	signal i: natural range 0 to setup_length - 1;
 
 begin
-	--Timer (using strategy #1):
+	--Timer
 	process (clk, rst)
 	begin
 		if rst='0' then -- Active low reset
 			t <= 0;
+			i <= 0;
 		elsif rising_edge(clk) then
 			if pr_state /= nx_state then
 				t <= 0;
+				if nx_state = LoB or nx_state = Waiting then
+					i <= i+1;
+				end if;
 			elsif t /= tmax then
 				t <= t + 1;
 			end if;
@@ -41,7 +69,7 @@ begin
 	process (clk, rst)
 	begin
 		if rst='0' then -- Active low reset
-			pr_state <= idle;
+			pr_state <= Waiting;
 		elsif rising_edge(clk) then
 			pr_state <= nx_state;
 		end if;
@@ -49,90 +77,93 @@ begin
 
 	--FSM combinational logic:
 	process (all)
-		variable i: natural range 0 to 7;
+		--variable i: natural range 0 to setup_length - 1;
 		begin
 		case pr_state is
-			-- All state logic follows same template:
-			-- when STATE
-			--		ssd <= proper SSD for this state
-			--		if t >= state timeout then
-			--			if going clockwise then
-			--				go down the list of states
-			--			else (counterclockwise)
-			--				go up the list of states
-			--		else (not enough time passed)
-			--			stay in current state
-			when idle =>
+			when Waiting =>
 				scl <= '1';
-				sda <= '1';
-				if t >= T1-1 then
-					if start_button='0' then
-						nx_state <= start_A;
-					end if;
+				sda <= 'Z';
+				if t >= T2-1 and start_button = '0' then
+					nx_state <= HiA;
 				else
-					nx_state <= idle;
+					nx_state <= Waiting;
 				end if;
 				
-			when start_A =>
+			when HiA =>
 				scl <= '1';
-				sda <= '0';
+				case setup(i) is
+					when START => 	sda <= 'Z';
+					when ONE => 	sda <= 'Z';
+					when ZERO => 	sda <= '0';
+					when S_ACK => 	sda <= 'Z';
+					when M_ACK => 	sda <= '0';
+					when STOP => 	sda <= '0';
+					when RD => 		sda <= 'Z';
+					when others => sda <= 'Z';
+				end case;
 				if t >= T1-1 then
-					nx_state <= start_B;
+					nx_state <= HiB;
 				else
-					nx_state <= start_A;
+					nx_state <= HiA;
 				end if;
 				
-			when start_B =>
-				scl <= '0';
-				sda <= '0';
-				if t >= T1-1 then
-					nx_state <= SCL_Low_A;
-				else
-					nx_state <= start_B;
-				end if;
-				
-			when SCL_Low_A =>
-				scl <= '0';
-				sda <= address(i);
-				if t >= T1-1 then
-					nx_state <= SCL_Low_B;
-				else
-					nx_state <= SCL_Low_A;
-				end if;
-				
-			when SCL_Low_B =>
-				scl <= '0';
-				sda <= address(i);
-				if t >= T1-1 then
-					nx_state <= SCL_High_A;
-				else
-					nx_state <= SCL_Low_B;
-				end if;
-				
-			when SCL_High_A =>
+			when HiB =>
 				scl <= '1';
-				sda <= address(i);
+				case setup(i) is
+					when START => 	sda <= '0';
+					when ONE => 	sda <= 'Z';
+					when ZERO => 	sda <= '0';
+					when S_ACK => 	sda <= 'Z';
+					when M_ACK => 	sda <= '0';
+					when STOP => 	sda <= '0';
+					when RD => 		sda <= 'Z';
+					when others => sda <= 'Z';
+				end case;
 				if t >= T1-1 then
-					nx_state <= SCL_High_B;
-				else
-					nx_state <= SCL_High_A;
-				end if;
-				
-			when SCL_High_B =>
-				scl <= '1';
-				sda <= address(i);
-				if t >= T1-1 then
-					i := i + 1;
-					if i=7 then
-						nx_state <= idle;
-						i := 0;
+					if setup(i) = STOP then
+						nx_state <= Waiting;
 					else
-						nx_state <= SCL_Low_A;
+						nx_state <= LoA;
 					end if;
 				else
-					nx_state <= SCL_High_B;
+					nx_state <= HiB;
 				end if;
-			
+				
+			when LoA =>
+				scl <= '0';
+				case setup(i) is
+					when START => 	sda <= '0';
+					when ONE => 	sda <= 'Z';
+					when ZERO => 	sda <= '0';
+					when S_ACK => 	sda <= 'Z';
+					when M_ACK => 	sda <= '0';
+					when STOP => 	sda <= 'Z';
+					when RD => 		sda <= 'Z';
+					when others => sda <= 'Z';
+				end case;
+				if t >= T1-1 then
+					nx_state <= LoB;
+				else
+					nx_state <= LoA;
+				end if;
+				
+			when LoB =>
+				scl <= '0';
+				case setup(i) is
+					when START => 	sda <= 'Z';
+					when ONE => 	sda <= 'Z';
+					when ZERO => 	sda <= '0';
+					when S_ACK => 	sda <= 'Z';
+					when M_ACK => 	sda <= '0';
+					when STOP => 	sda <= '0';
+					when RD => 		sda <= 'Z';
+					when others => sda <= 'Z';
+				end case;
+				if t >= T1-1 then
+					nx_state <= HiA;
+				else
+					nx_state <= LoB;
+				end if;	
 		end case;
 	end process;
 end architecture;

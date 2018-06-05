@@ -1,0 +1,8 @@
+
+State Machine - |i2c_test|pr_state
+Name pr_state.LoB pr_state.LoA pr_state.HiB pr_state.HiA pr_state.Waiting 
+pr_state.Waiting 0 0 0 0 0 
+pr_state.HiA 0 0 0 1 1 
+pr_state.HiB 0 0 1 0 1 
+pr_state.LoA 0 1 0 0 1 
+pr_state.LoB 1 0 0 0 1 
