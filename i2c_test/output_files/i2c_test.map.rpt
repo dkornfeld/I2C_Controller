@@ -1,5 +1,5 @@
 Analysis & Synthesis report for i2c_test
-Mon Jun 04 18:41:52 2018
+Tue Jun 05 16:16:20 2018
 Quartus II 64-Bit Version 13.1.0 Build 162 10/23/2013 SJ Web Edition
 
 
@@ -14,10 +14,11 @@ Quartus II 64-Bit Version 13.1.0 Build 162 10/23/2013 SJ Web Edition
   6. Analysis & Synthesis Resource Usage Summary
   7. Analysis & Synthesis Resource Utilization by Entity
   8. State Machine - |i2c_test|pr_state
-  9. General Register Statistics
- 10. Multiplexer Restructuring Statistics (Restructuring Performed)
- 11. Elapsed Time Per Partition
- 12. Analysis & Synthesis Messages
+  9. User-Specified and Inferred Latches
+ 10. General Register Statistics
+ 11. Multiplexer Restructuring Statistics (Restructuring Performed)
+ 12. Elapsed Time Per Partition
+ 13. Analysis & Synthesis Messages
 
 
 
@@ -43,14 +44,14 @@ applicable agreement for further details.
 +------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                 ;
 +---------------------------------+--------------------------------------------+
-; Analysis & Synthesis Status     ; Successful - Mon Jun 04 18:41:52 2018      ;
+; Analysis & Synthesis Status     ; Successful - Tue Jun 05 16:16:20 2018      ;
 ; Quartus II 64-Bit Version       ; 13.1.0 Build 162 10/23/2013 SJ Web Edition ;
 ; Revision Name                   ; i2c_test                                   ;
 ; Top-level Entity Name           ; i2c_test                                   ;
 ; Family                          ; Cyclone V                                  ;
 ; Logic utilization (in ALMs)     ; N/A                                        ;
-; Total registers                 ; 23                                         ;
-; Total pins                      ; 5                                          ;
+; Total registers                 ; 36                                         ;
+; Total pins                      ; 13                                         ;
 ; Total virtual pins              ; 0                                          ;
 ; Total block memory bits         ; 0                                          ;
 ; Total DSP Blocks                ; 0                                          ;
@@ -176,23 +177,23 @@ Parallel compilation was disabled, but you have multiple processors available. E
 +---------------------------------------------+-----------+
 ; Resource                                    ; Usage     ;
 +---------------------------------------------+-----------+
-; Estimate of Logic utilization (ALMs needed) ; 32        ;
+; Estimate of Logic utilization (ALMs needed) ; 65        ;
 ;                                             ;           ;
-; Combinational ALUT usage for logic          ; 50        ;
+; Combinational ALUT usage for logic          ; 103       ;
 ;     -- 7 input functions                    ; 0         ;
-;     -- 6 input functions                    ; 13        ;
-;     -- 5 input functions                    ; 12        ;
-;     -- 4 input functions                    ; 9         ;
-;     -- <=3 input functions                  ; 16        ;
+;     -- 6 input functions                    ; 26        ;
+;     -- 5 input functions                    ; 22        ;
+;     -- 4 input functions                    ; 15        ;
+;     -- <=3 input functions                  ; 40        ;
 ;                                             ;           ;
-; Dedicated logic registers                   ; 23        ;
+; Dedicated logic registers                   ; 36        ;
 ;                                             ;           ;
-; I/O pins                                    ; 5         ;
+; I/O pins                                    ; 13        ;
 ; Total DSP Blocks                            ; 0         ;
 ; Maximum fan-out node                        ; clk~input ;
-; Maximum fan-out                             ; 23        ;
-; Total fan-out                               ; 309       ;
-; Average fan-out                             ; 3.64      ;
+; Maximum fan-out                             ; 36        ;
+; Total fan-out                               ; 599       ;
+; Average fan-out                             ; 3.59      ;
 +---------------------------------------------+-----------+
 
 
@@ -201,7 +202,7 @@ Parallel compilation was disabled, but you have multiple processors available. E
 +----------------------------+-------------------+--------------+-------------------+------------+------+--------------+---------------------+--------------+
 ; Compilation Hierarchy Node ; LC Combinationals ; LC Registers ; Block Memory Bits ; DSP Blocks ; Pins ; Virtual Pins ; Full Hierarchy Name ; Library Name ;
 +----------------------------+-------------------+--------------+-------------------+------------+------+--------------+---------------------+--------------+
-; |i2c_test                  ; 50 (50)           ; 23 (23)      ; 0                 ; 0          ; 5    ; 0            ; |i2c_test           ; work         ;
+; |i2c_test                  ; 103 (103)         ; 36 (36)      ; 0                 ; 0          ; 13   ; 0            ; |i2c_test           ; work         ;
 +----------------------------+-------------------+--------------+-------------------+------------+------+--------------+---------------------+--------------+
 Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
 
@@ -220,17 +221,35 @@ Encoding Type:  One-Hot
 +------------------+--------------+--------------+--------------+--------------+------------------+
 
 
++---------------------------------------------------------------------------------------------------+
+; User-Specified and Inferred Latches                                                               ;
++----------------------------------------------------+---------------------+------------------------+
+; Latch Name                                         ; Latch Enable Signal ; Free of Timing Hazards ;
++----------------------------------------------------+---------------------+------------------------+
+; raw_data[7]                                        ; Decoder0            ; yes                    ;
+; raw_data[6]                                        ; Decoder0            ; yes                    ;
+; raw_data[5]                                        ; Decoder0            ; yes                    ;
+; raw_data[4]                                        ; Decoder0            ; yes                    ;
+; raw_data[3]                                        ; Decoder0            ; yes                    ;
+; raw_data[2]                                        ; Decoder0            ; yes                    ;
+; raw_data[1]                                        ; Decoder0            ; yes                    ;
+; raw_data[0]                                        ; Decoder0            ; yes                    ;
+; Number of user-specified and inferred latches = 8  ;                     ;                        ;
++----------------------------------------------------+---------------------+------------------------+
+Note: All latches listed above may not be present at the end of synthesis due to various synthesis optimizations.
+
+
 +------------------------------------------------------+
 ; General Register Statistics                          ;
 +----------------------------------------------+-------+
 ; Statistic                                    ; Value ;
 +----------------------------------------------+-------+
-; Total registers                              ; 23    ;
-; Number of registers using Synchronous Clear  ; 12    ;
+; Total registers                              ; 36    ;
+; Number of registers using Synchronous Clear  ; 25    ;
 ; Number of registers using Synchronous Load   ; 0     ;
-; Number of registers using Asynchronous Clear ; 23    ;
+; Number of registers using Asynchronous Clear ; 36    ;
 ; Number of registers using Asynchronous Load  ; 0     ;
-; Number of registers using Clock Enable       ; 12    ;
+; Number of registers using Clock Enable       ; 25    ;
 ; Number of registers using Preset             ; 0     ;
 +----------------------------------------------+-------+
 
@@ -240,7 +259,8 @@ Encoding Type:  One-Hot
 +--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------+
 ; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output ;
 +--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------+
-; 3:1                ; 12 bits   ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |i2c_test|t[11]            ;
+; 3:1                ; 6 bits    ; 12 LEs        ; 6 LEs                ; 6 LEs                  ; Yes        ; |i2c_test|DP[5]            ;
+; 3:1                ; 12 bits   ; 24 LEs        ; 0 LEs                ; 24 LEs                 ; Yes        ; |i2c_test|t[4]             ;
 +--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------+
 
 
@@ -259,13 +279,29 @@ Encoding Type:  One-Hot
 Info: *******************************************************************
 Info: Running Quartus II 64-Bit Analysis & Synthesis
     Info: Version 13.1.0 Build 162 10/23/2013 SJ Web Edition
-    Info: Processing started: Mon Jun 04 18:41:48 2018
+    Info: Processing started: Tue Jun 05 16:16:15 2018
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off i2c_test -c i2c_test
 Warning (20028): Parallel compilation is not licensed and has been disabled
 Info (12021): Found 2 design units, including 1 entities, in source file i2c_test.vhd
     Info (12022): Found design unit 1: i2c_test-moore_fsm
     Info (12023): Found entity 1: i2c_test
 Info (12127): Elaborating entity "i2c_test" for the top level hierarchy
+Warning (10631): VHDL Process Statement warning at i2c_test.vhd(115): inferring latch(es) for signal or variable "raw_data", which holds its previous value in one or more paths through the process
+Info (10041): Inferred latch for "raw_data[7]" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "raw_data[6]" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "raw_data[5]" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "raw_data[4]" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "raw_data[3]" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "raw_data[2]" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "raw_data[1]" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "raw_data[0]" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "internal_element.STOP" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "internal_element.RD" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "internal_element.M_ACK" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "internal_element.S_ACK" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "internal_element.ZERO" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "internal_element.ONE" at i2c_test.vhd(115)
+Info (10041): Inferred latch for "internal_element.START" at i2c_test.vhd(115)
 Warning (13034): The following nodes have both tri-state and non-tri-state drivers
     Warning (13035): Inserted always-enabled tri-state buffer between "scl" and its non-tri-state driver.
 Warning (13009): TRI or OPNDRN buffers permanently enabled
@@ -273,15 +309,17 @@ Warning (13009): TRI or OPNDRN buffers permanently enabled
 Info (286030): Timing-Driven Synthesis is running
 Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
     Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
-Info (21057): Implemented 58 device resources after synthesis - the final resource count might be different
+Warning (21074): Design contains 1 input pin(s) that do not drive logic
+    Warning (15610): No output dependent on input pin "start_button"
+Info (21057): Implemented 117 device resources after synthesis - the final resource count might be different
     Info (21058): Implemented 3 input pins
-    Info (21059): Implemented 0 output pins
+    Info (21059): Implemented 8 output pins
     Info (21060): Implemented 2 bidirectional pins
-    Info (21061): Implemented 53 logic cells
-Info: Quartus II 64-Bit Analysis & Synthesis was successful. 0 errors, 5 warnings
-    Info: Peak virtual memory: 645 megabytes
-    Info: Processing ended: Mon Jun 04 18:41:52 2018
-    Info: Elapsed time: 00:00:04
-    Info: Total CPU time (on all processors): 00:00:04
+    Info (21061): Implemented 104 logic cells
+Info: Quartus II 64-Bit Analysis & Synthesis was successful. 0 errors, 8 warnings
+    Info: Peak virtual memory: 649 megabytes
+    Info: Processing ended: Tue Jun 05 16:16:20 2018
+    Info: Elapsed time: 00:00:05
+    Info: Total CPU time (on all processors): 00:00:05
 
 
