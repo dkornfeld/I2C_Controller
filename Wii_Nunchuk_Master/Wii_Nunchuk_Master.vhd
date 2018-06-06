@@ -182,7 +182,8 @@ begin
                 when M_NACK =>  sda <= 'Z';     --high to ack when done sending
                 when STOP => 	sda <= '0';     --bring scl high first when
                                                 --stopping so leave sda low
-                when RD => 		sda <= 'Z';     --hiZ when reading
+                when RD => 		sda <= 'Z';     --hiZ when reading to let slave
+                                                --transmit
                 when others =>  sda <= 'Z';     --hiZ by default
             end case;
             if t >= T1-1 then                   --if timer counter is below
@@ -208,7 +209,8 @@ begin
                 when M_NACK =>  sda <= 'Z';     --high to ack when done sending
                 when STOP => 	sda <= 'Z';     --now bring sda high because
                                                 --scl already went high first
-                when RD => 		sda <= 'Z';     --hiZ when reading
+                when RD => 		sda <= 'Z';     --hiZ when reading to let slave
+                                                --transmit
                 when others =>  sda <= 'Z';     --hiZ by default
             end case;                           
             if receive(j) = RD then             --if have a READ message, then
@@ -239,10 +241,10 @@ begin
                 when S_ACK => 	sda <= '0';     --hiZ to let the slave ack
                 when M_ACK => 	sda <= '0';     --low to perform an ack
                 when M_NACK =>  sda <= 'Z';     --high to ack when done sending
-                when STOP => 	sda <= '0';     --have full scl clock cycle left
-                                                --before stopping i2c, so can
-                                                --just leave sda high for now
-                when RD => 		sda <= 'Z';     --hiZ when reading
+                when STOP => 	sda <= '0';     --scl comes high first when
+                                                --stopping, so leave sda low
+                when RD => 		sda <= 'Z';     --hiZ when reading to let slave
+                                                --transmit
                 when others =>  sda <= 'Z';     --hiZ by default
             end case;
             if t >= T1-1 then                   --if timer counter is high
@@ -265,8 +267,10 @@ begin
                 when S_ACK => 	sda <= 'Z';     --hiZ to let the slave ack
                 when M_ACK => 	sda <= '0';     --low to perform an ack
                 when M_NACK =>  sda <= 'Z';     --high to ack when done sending
-                when STOP => 	sda <= '0';     --low when stopping
-                when RD => 		sda <= 'Z';     --hiZ when reading
+                when STOP => 	sda <= '0';     --again, scl comes high first
+                                                --when stopping, so sda is low
+                when RD => 		sda <= 'Z';     --hiZ when reading to let slave
+                                                --transmit
                 when others =>  sda <= 'Z';     --hiZ by default
             end case;
             if t >= T1-1 then                   --if timer counter is high

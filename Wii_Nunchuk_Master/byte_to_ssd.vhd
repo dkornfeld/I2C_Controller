@@ -13,13 +13,20 @@ port (
 end entity;
 ----------------------------------------------------------------------------------
 architecture byte_to_ssd_sequential of byte_to_ssd is
-   signal ones_digit: integer range 0 to 9;
-   signal tens_digit: integer range 0 to 9;
-   signal huns_digit: integer range 0 to 9;
+   signal ones_digit: integer range 0 to 9; --internal value of ones digit of x
+   signal tens_digit: integer range 0 to 9; --internal value of tens digit of x
+   signal huns_digit: integer range 0 to 9; --internal value of x's hundreds digit
 begin
-   ones_digit <= to_integer(unsigned(x)) mod 10;
-   tens_digit <= (to_integer(unsigned(x)) mod 100) / 10;
-   huns_digit <= to_integer(unsigned(x)) / 100;
+   ones_digit <= to_integer(unsigned(x)) mod 10;        --mod 10 of any integer
+                                                        --gives the ones digit
+   tens_digit <= (to_integer(unsigned(x)) mod 100) / 10;--mod 100 gives the lower
+                                                        --two digits, and dividing
+                                                        --by 10 gives the tens
+                                                        --digit
+   huns_digit <= to_integer(unsigned(x)) / 100;         --dividing a 3-digit
+                                                        --integer by 100 always
+                                                        --gives the hundreds digit
+   --seven segment display decoding logic 
    with ones_digit select
        ssd0 <= "0000001" when 0,
                "1001111" when 1,
