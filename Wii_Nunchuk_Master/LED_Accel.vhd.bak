@@ -4,29 +4,29 @@ use ieee.numeric_std.all;
 ---------------------------------------------------------------------------------
 entity LED_Accel is
 port (
-	acceleration1:				in std_logic_vector(9 downto 0); -- 10-bit acceleration
-	acceleration2:				in std_logic_vector(9 downto 0); -- value inputs to be
-	acceleration3:				in std_logic_vector(9 downto 0); -- selected
-	set_input1, set_input0: in std_logic;							-- Selects acc input
-	LED_Pattern:				out std_logic_vector(9 downto 0));-- The output
+	acceleration1:				in std_logic_vector(9 downto 0);
+	acceleration2:				in std_logic_vector(9 downto 0);
+	acceleration3:				in std_logic_vector(9 downto 0);
+	set_input1, set_input0: in std_logic;
+	LED_Pattern:				out std_logic_vector(9 downto 0));
 end entity;
 ---------------------------------------------------------------------------------
 architecture LED_Accel_case_based of LED_Accel is
-	signal acc1, acc2, acc3: integer range 0 to 1023; 	-- Integer versions of inputs
-	signal acc: integer range 0 to 1023;					-- Integer output
-	signal input_vector: std_logic_vector(1 downto 0);	-- Vector version of inp. sel.
+	signal acc1, acc2, acc3: integer range 0 to 1023;
+	signal acc: integer range 0 to 1023;
+	signal input_vector: std_logic_vector(1 downto 0);
 begin
-	input_vector <= (set_input1, set_input0); 	-- Group input bits
-	acc1 <= to_integer(unsigned(acceleration1));	-- Convert to integer
-	acc2 <= to_integer(unsigned(acceleration2)); -- Convert to integer
-	acc3 <= to_integer(unsigned(acceleration3)); -- Convert to integer
-	with input_vector select acc <= -- Select the output from inputs based on inp. sel.
+	input_vector <= (set_input1, set_input0);
+	acc1 <= to_integer(unsigned(acceleration1));
+	acc2 <= to_integer(unsigned(acceleration2));
+	acc3 <= to_integer(unsigned(acceleration3));
+	with input_vector select acc <=
 		acc1 when "00",
 		acc2 when "01",
 		acc3 when "10",
-		0 when others; -- Default case, output zero
-	process(acc) 	-- Convert acceleration (0-1023) to one-hot LED pattern based on
-	begin				-- ranges
+		0 when others;
+	process(acc)
+	begin
 		if acc >= 0 and acc <= 100 then
 			LED_Pattern <= "1000000000";
 		elsif acc >= 101 and acc <= 200 then
