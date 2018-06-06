@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<LOG_ROOT>
+	<PROJECT NAME="Wii_Nunchuk_Master">
+		<CBX_INST_ENTRY INSTANCE_NAME="|Wii_Nunchuk_Master|byte_to_ssd:U2|lpm_divide:Div1" CBX_FILE_NAME="lpm_divide_8am.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Wii_Nunchuk_Master|byte_to_ssd:U2|lpm_divide:Mod0" CBX_FILE_NAME="lpm_divide_c2m.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Wii_Nunchuk_Master|byte_to_ssd:U3|lpm_divide:Div0" CBX_FILE_NAME="lpm_divide_5am.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Wii_Nunchuk_Master|byte_to_ssd:U3|lpm_divide:Mod1" CBX_FILE_NAME="lpm_divide_c2m.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Wii_Nunchuk_Master|byte_to_ssd:U2|lpm_divide:Div0" CBX_FILE_NAME="lpm_divide_5am.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Wii_Nunchuk_Master|byte_to_ssd:U2|lpm_divide:Mod1" CBX_FILE_NAME="lpm_divide_c2m.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Wii_Nunchuk_Master|byte_to_ssd:U3|lpm_divide:Div1" CBX_FILE_NAME="lpm_divide_8am.tdf"/>
+		<CBX_INST_ENTRY INSTANCE_NAME="|Wii_Nunchuk_Master|byte_to_ssd:U3|lpm_divide:Mod0" CBX_FILE_NAME="lpm_divide_c2m.tdf"/>
+	</PROJECT>
+</LOG_ROOT>
