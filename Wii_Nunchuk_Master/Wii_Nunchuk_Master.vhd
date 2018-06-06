@@ -153,119 +153,126 @@ begin
 	--FSM combinational logic:
 	process (all)
 		variable internal_element: i2c_element;
-		begin
+    begin
 		case pr_state is
 			
-        when Waiting =>
-            scl <= '1';
-                sda <= 'Z';
-            if t < T2 - 1 then
-               nx_state <= Waiting;
+        when Waiting =>                         --in the idle state
+            scl <= '1';                         --want both the serial data
+            sda <= 'Z';                         --and serial clock lines high
+            if t < T2 - 1 then                  --if timer counter is below
+               nx_state <= Waiting;             --the idle time, stay here
             else
-               nx_state <= HiA;
+               nx_state <= HiA;                 --otherwise, move on
             end if;
             
-        when HiA =>
-            scl <= '1';
+        when HiA =>                             --in the first half of the
+            scl <= '1';                         --serial clock's high time
             if i < setup_length then
-               internal_element := setup(i);
+               internal_element := setup(i);    --still in the setup loop
             else
-               internal_element := receive(j);
+               internal_element := receive(j);  --or in the receive loop
             end if;
-            case internal_element is
-                when START => 	sda <= 'Z';
-                when ONE => 	sda <= 'Z';
-                when ZERO => 	sda <= '0';
-                when S_ACK => 	sda <= 'Z';
-                when M_ACK => 	sda <= '0';
-                when M_NACK =>  sda <= 'Z';
-                when STOP => 	sda <= '0';
-                when RD => 		sda <= 'Z';
-                when others =>  sda <= 'Z';
+            case internal_element is            --the serial data should be
+                when START => 	sda <= 'Z';     --both sda and scl are high
+                                                --right after starting
+                when ONE => 	sda <= 'Z';     --high when sending a one
+                when ZERO => 	sda <= '0';     --low when sending a zero
+                when S_ACK => 	sda <= 'Z';     --hiZ to let the slave ack
+                when M_ACK => 	sda <= '0';     --low to perform an ack
+                when M_NACK =>  sda <= 'Z';     --high to ack when done sending
+                when STOP => 	sda <= '0';     --bring scl high first when
+                                                --stopping so leave sda low
+                when RD => 		sda <= 'Z';     --hiZ when reading
+                when others =>  sda <= 'Z';     --hiZ by default
             end case;
-            if t >= T1-1 then
-                nx_state <= HiB;
+            if t >= T1-1 then                   --if timer counter is below
+                nx_state <= HiB;                --loop time, stay here
             else
-                nx_state <= HiA;
+                nx_state <= HiA;                --otherwise, move on
             end if;
             
-        when HiB =>
-            scl <= '1';
+        when HiB =>                             --in the second half of the
+            scl <= '1';                         --serial clock's high time
             if i < setup_length then
-               internal_element := setup(i);
+               internal_element := setup(i);    --still in the setup loop
             else
-               internal_element := receive(j);
+               internal_element := receive(j);  --or in the receive loop
             end if;
-            case internal_element is
-                when START => 	sda <= '0';
-                when ONE => 	sda <= 'Z';
-                when ZERO => 	sda <= '0';
-                when S_ACK => 	sda <= 'Z';
-                when M_ACK => 	sda <= '0';
-                when M_NACK =>  sda <= 'Z';
-                when STOP => 	sda <= 'Z';
-                when RD => 		sda <= 'Z';
-                when others =>  sda <= 'Z';
-            end case;
-            if receive(j) = RD then
-               raw_data(DP) <= sda;
-            end if;
-            if t >= T1-1 then
-                if internal_element = STOP then
-                    nx_state <= Waiting;
+            case internal_element is            --the serial data should be
+                when START => 	sda <= '0';     --bring sda low while scl is
+                                                --high to start i2c 
+                when ONE => 	sda <= 'Z';     --high when sending a one
+                when ZERO => 	sda <= '0';     --low when sending a zero
+                when S_ACK => 	sda <= 'Z';     --hiZ to let the slave ack
+                when M_ACK => 	sda <= '0';     --low to perform an ack
+                when M_NACK =>  sda <= 'Z';     --high to ack when done sending
+                when STOP => 	sda <= 'Z';     --now bring sda high because
+                                                --scl already went high first
+                when RD => 		sda <= 'Z';     --hiZ when reading
+                when others =>  sda <= 'Z';     --hiZ by default
+            end case;                           
+            if receive(j) = RD then             --if have a READ message, then
+               raw_data(DP) <= sda;             --store the serial data bit 
+            end if;                             --in the raw_data buffer
+            if t >= T1-1 then                   --next state calculations:
+                if internal_element = STOP then --if have a STOP message, then
+                    nx_state <= Waiting;        --go back to the idle state
                 else
-                    nx_state <= LoA;
+                    nx_state <= LoA;            --otherwise, move on
                 end if;
             else
-                nx_state <= HiB;
+                nx_state <= HiB;                --stay here, by default
             end if;
             
-        when LoA =>
-            scl <= '0';
-            if i < setup_length then
-               internal_element := setup(i);
+        when LoA =>                             --in the first half of the
+            scl <= '0';                         --serial clock's low time
+            if i < setup_length then            
+               internal_element := setup(i);    --still in the setup loop
             else
-               internal_element := receive(j);
+               internal_element := receive(j);  --otherwise, in receive loop
             end if;
-            case internal_element is
-                when START => 	sda <= '0';
-                when ONE => 	sda <= 'Z';
-                when ZERO => 	sda <= '0';
-                when S_ACK => 	sda <= '0';
-                when M_ACK => 	sda <= '0';
-                when M_NACK =>  sda <= 'Z';
-                when STOP => 	sda <= 'Z';
-                when RD => 		sda <= 'Z';
-                when others =>  sda <= 'Z';
+            case internal_element is            --the serial data should be
+                when START => 	sda <= '0';     --keep sda low just after scl
+                                                --is brought low to start i2c
+                when ONE => 	sda <= 'Z';     --high when sending a one
+                when ZERO => 	sda <= '0';     --low when sending a zero
+                when S_ACK => 	sda <= '0';     --hiZ to let the slave ack
+                when M_ACK => 	sda <= '0';     --low to perform an ack
+                when M_NACK =>  sda <= 'Z';     --high to ack when done sending
+                when STOP => 	sda <= '0';     --have full scl clock cycle left
+                                                --before stopping i2c, so can
+                                                --just leave sda high for now
+                when RD => 		sda <= 'Z';     --hiZ when reading
+                when others =>  sda <= 'Z';     --hiZ by default
             end case;
-            if t >= T1-1 then
-                nx_state <= LoB;
+            if t >= T1-1 then                   --if timer counter is high
+                nx_state <= LoB;                --enough, then move on
             else
-                nx_state <= LoA;
+                nx_state <= LoA;                --otherwise, stay here
             end if;
             
-        when LoB =>
-            scl <= '0';
-            if i < setup_length then
-               internal_element := setup(i);
+        when LoB =>                             --in the second half of the 
+            scl <= '0';                         --serial clock's low time
+            if i < setup_length then            
+               internal_element := setup(i);    --still in the setup loop
             else
-               internal_element := receive(j);
+               internal_element := receive(j);  --otherwise, in receive loop
             end if;
-            case internal_element is
-                when START => 	sda <= 'Z';
-                when ONE => 	sda <= 'Z';
-                when ZERO => 	sda <= '0';
-                when S_ACK => 	sda <= 'Z';
-                when M_ACK => 	sda <= '0';
-                when M_NACK =>  sda <= 'Z';
-                when STOP => 	sda <= '0';
-                when RD => 		sda <= 'Z';
-                when others =>  sda <= 'Z';
+            case internal_element is            --the serial data should be
+                when START => 	sda <= 'Z';     --high when starting
+                when ONE => 	sda <= 'Z';     --high when sending a one
+                when ZERO => 	sda <= '0';     --low when sending a zero
+                when S_ACK => 	sda <= 'Z';     --hiZ to let the slave ack
+                when M_ACK => 	sda <= '0';     --low to perform an ack
+                when M_NACK =>  sda <= 'Z';     --high to ack when done sending
+                when STOP => 	sda <= '0';     --low when stopping
+                when RD => 		sda <= 'Z';     --hiZ when reading
+                when others =>  sda <= 'Z';     --hiZ by default
             end case;
-            if t >= T1-1 then
-                nx_state <= HiA;
+            if t >= T1-1 then                   --if timer counter is high
+                nx_state <= HiA;                --enough, then move on
             else
-                nx_state <= LoB;
+                nx_state <= LoB;                --otherwise, stay here
             end if;
             
 		end case;
