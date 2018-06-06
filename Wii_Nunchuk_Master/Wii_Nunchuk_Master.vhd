@@ -117,35 +117,37 @@ architecture moore_fsm of Wii_Nunchuk_Master is
 begin
 
 	--Clock and Reset
-	process (clk, rst)
+	process (clk, rst)                                      
 	begin
       if rst = '0' then
-         t <= 0;
-			i <= 0;
-         j <= 0;
-			DP <= 0;
-         pr_state <= Waiting;
-		elsif rising_edge(clk) then
-         if pr_state /= nx_state then
-				t <= 0;
-            if nx_state = LoB or nx_state = Waiting then
-               if i < setup_length then
-                  i <= i + 1;
-               elsif j < receive_length - 1 then
-						if receive(j) = RD then
-							DP <= DP + 1;
-						end if;
-                  j <= j + 1;
-               else
-                  j <= 0;
-						DP <= 0;
-               end if;
+         t <= 0;                        --reset the system clock counter
+		 i <= 0;                        --reset the initialization message index
+         j <= 0;                        --reset the receive loop message index
+         DP <= 0;                       --reset the data pointer
+         pr_state <= Waiting;           --go back to the idle state
+      elsif rising_edge(clk) then
+      if pr_state /= nx_state then      --if we are transitioning to a new state
+         t <= 0;                        --reset the system clock counter
+         if nx_state = LoB or nx_state = Waiting then    --and check if we need
+                                                         --to move on to the next
+                                                         --message
+            if i < setup_length then             
+               i <= i + 1;                       --if i is saturated, then
+            elsif j < receive_length - 1 then    --we are in the receive loop
+               if receive(j) = RD then           --if the current message
+                 DP <= DP + 1;                   --is a read, increment the
+               end if;                           --data pointer
+               j <= j + 1;                       --move on to next message
+            else                                 --otherwise, at end of receive
+               j <= 0;                           --so reset receive loop index
+               DP <= 0;                          --and the data pointer
             end if;
-			elsif t /= tmax then
-				t <= t + 1;
-			end if;
-         pr_state <= nx_state;
-		end if;
+         end if;
+      elsif t /= tmax then              --if not transitioning to the next
+         t <= t + 1;                    --state, increment the system clock
+      end if;                           --counter, if not already saturated
+      pr_state <= nx_state;             --update the current state as fast
+     end if;                            --as possible (on system clock)
 	end process;
 
 	--FSM combinational logic:
@@ -153,117 +155,118 @@ begin
 		variable internal_element: i2c_element;
 		begin
 		case pr_state is
-			when Waiting =>
+			
+        when Waiting =>
             scl <= '1';
-				sda <= 'Z';
+                sda <= 'Z';
             if t < T2 - 1 then
                nx_state <= Waiting;
             else
                nx_state <= HiA;
             end if;
-				
-			when HiA =>
-				scl <= '1';
+            
+        when HiA =>
+            scl <= '1';
             if i < setup_length then
                internal_element := setup(i);
             else
                internal_element := receive(j);
             end if;
-				case internal_element is
-					when START => 	sda <= 'Z';
-					when ONE => 	sda <= 'Z';
-					when ZERO => 	sda <= '0';
-					when S_ACK => 	sda <= 'Z';
-					when M_ACK => 	sda <= '0';
-					when M_NACK => sda <= 'Z';
-					when STOP => 	sda <= '0';
-					when RD => 		sda <= 'Z';
-					when others => sda <= 'Z';
-				end case;
-				if t >= T1-1 then
-					nx_state <= HiB;
-				else
-					nx_state <= HiA;
-				end if;
-				
-			when HiB =>
-				scl <= '1';
+            case internal_element is
+                when START => 	sda <= 'Z';
+                when ONE => 	sda <= 'Z';
+                when ZERO => 	sda <= '0';
+                when S_ACK => 	sda <= 'Z';
+                when M_ACK => 	sda <= '0';
+                when M_NACK =>  sda <= 'Z';
+                when STOP => 	sda <= '0';
+                when RD => 		sda <= 'Z';
+                when others =>  sda <= 'Z';
+            end case;
+            if t >= T1-1 then
+                nx_state <= HiB;
+            else
+                nx_state <= HiA;
+            end if;
+            
+        when HiB =>
+            scl <= '1';
             if i < setup_length then
                internal_element := setup(i);
             else
                internal_element := receive(j);
             end if;
-				case internal_element is
-					when START => 	sda <= '0';
-					when ONE => 	sda <= 'Z';
-					when ZERO => 	sda <= '0';
-					when S_ACK => 	sda <= 'Z';
-					when M_ACK => 	sda <= '0';
-					when M_NACK => sda <= 'Z';
-					when STOP => 	sda <= 'Z';
-					when RD => 		sda <= 'Z';
-					when others => sda <= 'Z';
-				end case;
-				if receive(j) = RD then
+            case internal_element is
+                when START => 	sda <= '0';
+                when ONE => 	sda <= 'Z';
+                when ZERO => 	sda <= '0';
+                when S_ACK => 	sda <= 'Z';
+                when M_ACK => 	sda <= '0';
+                when M_NACK =>  sda <= 'Z';
+                when STOP => 	sda <= 'Z';
+                when RD => 		sda <= 'Z';
+                when others =>  sda <= 'Z';
+            end case;
+            if receive(j) = RD then
                raw_data(DP) <= sda;
             end if;
-				if t >= T1-1 then
-					if internal_element = STOP then
-						nx_state <= Waiting;
-					else
-						nx_state <= LoA;
-					end if;
-				else
-					nx_state <= HiB;
-				end if;
-				
-			when LoA =>
-				scl <= '0';
+            if t >= T1-1 then
+                if internal_element = STOP then
+                    nx_state <= Waiting;
+                else
+                    nx_state <= LoA;
+                end if;
+            else
+                nx_state <= HiB;
+            end if;
+            
+        when LoA =>
+            scl <= '0';
             if i < setup_length then
                internal_element := setup(i);
             else
                internal_element := receive(j);
             end if;
-				case internal_element is
-					when START => 	sda <= '0';
-					when ONE => 	sda <= 'Z';
-					when ZERO => 	sda <= '0';
-					when S_ACK => 	sda <= '0';
-					when M_ACK => 	sda <= '0';
-					when M_NACK => sda <= 'Z';
-					when STOP => 	sda <= 'Z';
-					when RD => 		sda <= 'Z';
-					when others => sda <= 'Z';
-				end case;
-				if t >= T1-1 then
-					nx_state <= LoB;
-				else
-					nx_state <= LoA;
-				end if;
-				
-			when LoB =>
-				scl <= '0';
+            case internal_element is
+                when START => 	sda <= '0';
+                when ONE => 	sda <= 'Z';
+                when ZERO => 	sda <= '0';
+                when S_ACK => 	sda <= '0';
+                when M_ACK => 	sda <= '0';
+                when M_NACK =>  sda <= 'Z';
+                when STOP => 	sda <= 'Z';
+                when RD => 		sda <= 'Z';
+                when others =>  sda <= 'Z';
+            end case;
+            if t >= T1-1 then
+                nx_state <= LoB;
+            else
+                nx_state <= LoA;
+            end if;
+            
+        when LoB =>
+            scl <= '0';
             if i < setup_length then
                internal_element := setup(i);
             else
                internal_element := receive(j);
             end if;
-				case internal_element is
-					when START => 	sda <= 'Z';
-					when ONE => 	sda <= 'Z';
-					when ZERO => 	sda <= '0';
-					when S_ACK => 	sda <= 'Z';
-					when M_ACK => 	sda <= '0';
-					when M_NACK => sda <= 'Z';
-					when STOP => 	sda <= '0';
-					when RD => 		sda <= 'Z';
-					when others => sda <= 'Z';
-				end case;
-				if t >= T1-1 then
-					nx_state <= HiA;
-				else
-					nx_state <= LoB;
-				end if;
+            case internal_element is
+                when START => 	sda <= 'Z';
+                when ONE => 	sda <= 'Z';
+                when ZERO => 	sda <= '0';
+                when S_ACK => 	sda <= 'Z';
+                when M_ACK => 	sda <= '0';
+                when M_NACK =>  sda <= 'Z';
+                when STOP => 	sda <= '0';
+                when RD => 		sda <= 'Z';
+                when others =>  sda <= 'Z';
+            end case;
+            if t >= T1-1 then
+                nx_state <= HiA;
+            else
+                nx_state <= LoB;
+            end if;
             
 		end case;
 	end process;
